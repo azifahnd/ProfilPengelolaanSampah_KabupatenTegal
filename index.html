@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        #map {
+            width: 1333px;
+            height: 778px;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/BatasKecamatanKabupatenTegal_1.js"></script>
+        <script src="data/PetaAdministrasiDesaKelurahan_2.js"></script>
+        <script src="data/KepadatanPendudukKabupatenTegal_3.js"></script>
+        <script src="data/PersebaranHanggarPengelolaanSampahKabupatenTegal_4.js"></script>
+        <script src="data/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5.js"></script>
+        <script src="data/PersebaranTPS3RKabupatenTegal_6.js"></script>
+        <script src="data/JangkauanPelayananTPS3RKabupatenTegal_7.js"></script>
+        <script src="data/TPAPenujah_8.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-7.205701577631385,108.9215042290795],[-6.84854404628771,109.53206546532564]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_BatasKecamatanKabupatenTegal_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KABUPATEN'] !== null ? autolinker.link(feature.properties['KABUPATEN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SUMBER'] !== null ? autolinker.link(feature.properties['SUMBER'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(feature.properties['KECAMATAN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Luas'] !== null ? autolinker.link(feature.properties['Luas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(feature.properties['NAMOBJ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BatasKecamatanKabupatenTegal_1_0() {
+            return {
+                pane: 'pane_BatasKecamatanKabupatenTegal_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,182,54,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_BatasKecamatanKabupatenTegal_1');
+        map.getPane('pane_BatasKecamatanKabupatenTegal_1').style.zIndex = 401;
+        map.getPane('pane_BatasKecamatanKabupatenTegal_1').style['mix-blend-mode'] = 'normal';
+        var layer_BatasKecamatanKabupatenTegal_1 = new L.geoJson(json_BatasKecamatanKabupatenTegal_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BatasKecamatanKabupatenTegal_1',
+            layerName: 'layer_BatasKecamatanKabupatenTegal_1',
+            pane: 'pane_BatasKecamatanKabupatenTegal_1',
+            onEachFeature: pop_BatasKecamatanKabupatenTegal_1,
+            style: style_BatasKecamatanKabupatenTegal_1_0,
+        });
+        bounds_group.addLayer(layer_BatasKecamatanKabupatenTegal_1);
+        map.addLayer(layer_BatasKecamatanKabupatenTegal_1);
+        function pop_PetaAdministrasiDesaKelurahan_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKC'] !== null ? autolinker.link(feature.properties['WADMKC'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(feature.properties['NAMOBJ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMPR'] !== null ? autolinker.link(feature.properties['WADMPR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SUMBER'] !== null ? autolinker.link(feature.properties['SUMBER'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Luas'] !== null ? autolinker.link(feature.properties['Luas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PetaAdministrasiDesaKelurahan_2_0() {
+            return {
+                pane: 'pane_PetaAdministrasiDesaKelurahan_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,211,169,0.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PetaAdministrasiDesaKelurahan_2');
+        map.getPane('pane_PetaAdministrasiDesaKelurahan_2').style.zIndex = 402;
+        map.getPane('pane_PetaAdministrasiDesaKelurahan_2').style['mix-blend-mode'] = 'normal';
+        var layer_PetaAdministrasiDesaKelurahan_2 = new L.geoJson(json_PetaAdministrasiDesaKelurahan_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PetaAdministrasiDesaKelurahan_2',
+            layerName: 'layer_PetaAdministrasiDesaKelurahan_2',
+            pane: 'pane_PetaAdministrasiDesaKelurahan_2',
+            onEachFeature: pop_PetaAdministrasiDesaKelurahan_2,
+            style: style_PetaAdministrasiDesaKelurahan_2_0,
+        });
+        bounds_group.addLayer(layer_PetaAdministrasiDesaKelurahan_2);
+        map.addLayer(layer_PetaAdministrasiDesaKelurahan_2);
+        function pop_KepadatanPendudukKabupatenTegal_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KABUPATEN'] !== null ? autolinker.link(feature.properties['KABUPATEN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SUMBER'] !== null ? autolinker.link(feature.properties['SUMBER'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(feature.properties['KECAMATAN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Luas'] !== null ? autolinker.link(feature.properties['Luas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(feature.properties['NAMOBJ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kepadatan'] !== null ? autolinker.link(feature.properties['Kepadatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Keterangan'] !== null ? autolinker.link(feature.properties['Keterangan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KepadatanPendudukKabupatenTegal_3_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Sangat Tinggi':
+                    return {
+                pane: 'pane_KepadatanPendudukKabupatenTegal_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Tinggi':
+                    return {
+                pane: 'pane_KepadatanPendudukKabupatenTegal_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sedang':
+                    return {
+                pane: 'pane_KepadatanPendudukKabupatenTegal_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,191,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Rendah':
+                    return {
+                pane: 'pane_KepadatanPendudukKabupatenTegal_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(171,221,164,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sangat Rendah':
+                    return {
+                pane: 'pane_KepadatanPendudukKabupatenTegal_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,131,186,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KepadatanPendudukKabupatenTegal_3');
+        map.getPane('pane_KepadatanPendudukKabupatenTegal_3').style.zIndex = 403;
+        map.getPane('pane_KepadatanPendudukKabupatenTegal_3').style['mix-blend-mode'] = 'normal';
+        var layer_KepadatanPendudukKabupatenTegal_3 = new L.geoJson(json_KepadatanPendudukKabupatenTegal_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KepadatanPendudukKabupatenTegal_3',
+            layerName: 'layer_KepadatanPendudukKabupatenTegal_3',
+            pane: 'pane_KepadatanPendudukKabupatenTegal_3',
+            onEachFeature: pop_KepadatanPendudukKabupatenTegal_3,
+            style: style_KepadatanPendudukKabupatenTegal_3_0,
+        });
+        bounds_group.addLayer(layer_KepadatanPendudukKabupatenTegal_3);
+        map.addLayer(layer_KepadatanPendudukKabupatenTegal_3);
+        function pop_PersebaranHanggarPengelolaanSampahKabupatenTegal_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(feature.properties['NAMOBJ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['JmlHanggar'] !== null ? autolinker.link(feature.properties['JmlHanggar'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PersebaranHanggarPengelolaanSampahKabupatenTegal_4_0(feature) {
+            switch(String(feature.properties['JmlHanggar'])) {
+                case 'Jumlah Hanggar : Tidak Ada':
+                    return {
+                pane: 'pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jumlah Hanggar : 1':
+                    return {
+                pane: 'pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jumlah Hanggar : 2':
+                    return {
+                pane: 'pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,191,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jumlah Hanggar : 5':
+                    return {
+                pane: 'pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(171,221,164,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jumlah Hanggar : 6':
+                    return {
+                pane: 'pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,131,186,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4');
+        map.getPane('pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4').style.zIndex = 404;
+        map.getPane('pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4').style['mix-blend-mode'] = 'normal';
+        var layer_PersebaranHanggarPengelolaanSampahKabupatenTegal_4 = new L.geoJson(json_PersebaranHanggarPengelolaanSampahKabupatenTegal_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+            layerName: 'layer_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+            pane: 'pane_PersebaranHanggarPengelolaanSampahKabupatenTegal_4',
+            onEachFeature: pop_PersebaranHanggarPengelolaanSampahKabupatenTegal_4,
+            style: style_PersebaranHanggarPengelolaanSampahKabupatenTegal_4_0,
+        });
+        bounds_group.addLayer(layer_PersebaranHanggarPengelolaanSampahKabupatenTegal_4);
+        map.addLayer(layer_PersebaranHanggarPengelolaanSampahKabupatenTegal_4);
+        function pop_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Desa'] !== null ? autolinker.link(feature.properties['Desa'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Jns_Bang'] !== null ? autolinker.link(feature.properties['Jns_Bang'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['MsnOlahSam'] !== null ? autolinker.link(feature.properties['MsnOlahSam'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SumberDana'] !== null ? autolinker.link(feature.properties['SumberDana'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Keterangan'] !== null ? autolinker.link(feature.properties['Keterangan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kecamatan'] !== null ? autolinker.link(feature.properties['Kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Keterangan : Belum Beroperasi':
+                    return {
+                pane: 'pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5.svg',
+            iconSize: [15.2, 15.2]
+        }),
+                interactive: true,
+            }
+                    break;
+                case 'Keterangan : Sudah Beroperasi':
+                    return {
+                pane: 'pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5.svg',
+            iconSize: [15.2, 15.2]
+        }),
+                interactive: true,
+            }
+                    break;
+                case 'Keterangan : -':
+                    return {
+                pane: 'pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5.svg',
+            iconSize: [15.2, 15.2]
+        }),
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5');
+        map.getPane('pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5').style.zIndex = 405;
+        map.getPane('pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5').style['mix-blend-mode'] = 'normal';
+        var layer_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5 = new L.geoJson(json_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5',
+            layerName: 'layer_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5',
+            pane: 'pane_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5',
+            onEachFeature: pop_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5);
+        map.addLayer(layer_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5);
+        function pop_PersebaranTPS3RKabupatenTegal_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Desa'] !== null ? autolinker.link(feature.properties['Desa'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kecamatan'] !== null ? autolinker.link(feature.properties['Kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Penerimaan'] !== null ? autolinker.link(feature.properties['Penerimaan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Produk'] !== null ? autolinker.link(feature.properties['Produk'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kapasitas'] !== null ? autolinker.link(feature.properties['Kapasitas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ResiduLing'] !== null ? autolinker.link(feature.properties['ResiduLing'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Residu_TPA'] !== null ? autolinker.link(feature.properties['Residu_TPA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PersebaranTPS3RKabupatenTegal_6_0() {
+            return {
+                pane: 'pane_PersebaranTPS3RKabupatenTegal_6',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/PersebaranTPS3RKabupatenTegal_6.svg',
+            iconSize: [19.000000000000004, 19.000000000000004]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PersebaranTPS3RKabupatenTegal_6');
+        map.getPane('pane_PersebaranTPS3RKabupatenTegal_6').style.zIndex = 406;
+        map.getPane('pane_PersebaranTPS3RKabupatenTegal_6').style['mix-blend-mode'] = 'normal';
+        var layer_PersebaranTPS3RKabupatenTegal_6 = new L.geoJson(json_PersebaranTPS3RKabupatenTegal_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PersebaranTPS3RKabupatenTegal_6',
+            layerName: 'layer_PersebaranTPS3RKabupatenTegal_6',
+            pane: 'pane_PersebaranTPS3RKabupatenTegal_6',
+            onEachFeature: pop_PersebaranTPS3RKabupatenTegal_6,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_PersebaranTPS3RKabupatenTegal_6_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_PersebaranTPS3RKabupatenTegal_6);
+        map.addLayer(layer_PersebaranTPS3RKabupatenTegal_6);
+        function pop_JangkauanPelayananTPS3RKabupatenTegal_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['mrb_dist'] !== null ? autolinker.link(feature.properties['mrb_dist'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_JangkauanPelayananTPS3RKabupatenTegal_7_0() {
+            return {
+                pane: 'pane_JangkauanPelayananTPS3RKabupatenTegal_7',
+                opacity: 1,
+                color: 'rgba(0,164,240,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 4.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_JangkauanPelayananTPS3RKabupatenTegal_7');
+        map.getPane('pane_JangkauanPelayananTPS3RKabupatenTegal_7').style.zIndex = 407;
+        map.getPane('pane_JangkauanPelayananTPS3RKabupatenTegal_7').style['mix-blend-mode'] = 'normal';
+        var layer_JangkauanPelayananTPS3RKabupatenTegal_7 = new L.geoJson(json_JangkauanPelayananTPS3RKabupatenTegal_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_JangkauanPelayananTPS3RKabupatenTegal_7',
+            layerName: 'layer_JangkauanPelayananTPS3RKabupatenTegal_7',
+            pane: 'pane_JangkauanPelayananTPS3RKabupatenTegal_7',
+            onEachFeature: pop_JangkauanPelayananTPS3RKabupatenTegal_7,
+            style: style_JangkauanPelayananTPS3RKabupatenTegal_7_0,
+        });
+        bounds_group.addLayer(layer_JangkauanPelayananTPS3RKabupatenTegal_7);
+        map.addLayer(layer_JangkauanPelayananTPS3RKabupatenTegal_7);
+        function pop_TPAPenujah_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Desa'] !== null ? autolinker.link(feature.properties['Desa'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kecamatan'] !== null ? autolinker.link(feature.properties['Kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Thn_Bangun'] !== null ? autolinker.link(feature.properties['Thn_Bangun'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SumberDana'] !== null ? autolinker.link(feature.properties['SumberDana'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kapasitas'] !== null ? autolinker.link(feature.properties['Kapasitas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Pengelola'] !== null ? autolinker.link(feature.properties['Pengelola'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Status'] !== null ? autolinker.link(feature.properties['Status'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Catatan'] !== null ? autolinker.link(feature.properties['Catatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_TPAPenujah_8_0() {
+            return {
+                pane: 'pane_TPAPenujah_8',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/TPAPenujah_8.svg',
+            iconSize: [22.799999999999997, 22.799999999999997]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_TPAPenujah_8');
+        map.getPane('pane_TPAPenujah_8').style.zIndex = 408;
+        map.getPane('pane_TPAPenujah_8').style['mix-blend-mode'] = 'normal';
+        var layer_TPAPenujah_8 = new L.geoJson(json_TPAPenujah_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_TPAPenujah_8',
+            layerName: 'layer_TPAPenujah_8',
+            pane: 'pane_TPAPenujah_8',
+            onEachFeature: pop_TPAPenujah_8,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_TPAPenujah_8_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_TPAPenujah_8);
+        map.addLayer(layer_TPAPenujah_8);
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: '<img src="legend/TPAPenujah_8.png" /> TPA Penujah', layer: layer_TPAPenujah_8},
+            {label: '<img src="legend/JangkauanPelayananTPS3RKabupatenTegal_7.png" /> Jangkauan Pelayanan TPS3R Kabupaten Tegal', layer: layer_JangkauanPelayananTPS3RKabupatenTegal_7},
+            {label: '<img src="legend/PersebaranTPS3RKabupatenTegal_6.png" /> Persebaran TPS3R Kabupaten Tegal', layer: layer_PersebaranTPS3RKabupatenTegal_6},
+            {label: 'Persebaran Titik Hanggar Pengelolaan Sampah Kabupaten Tegal<br /><table><tr><td style="text-align: center;"><img src="legend/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5_KeteranganBelumBeroperasi0.png" /></td><td>Keterangan : Belum Beroperasi</td></tr><tr><td style="text-align: center;"><img src="legend/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5_KeteranganSudahBeroperasi1.png" /></td><td>Keterangan : Sudah Beroperasi</td></tr><tr><td style="text-align: center;"><img src="legend/PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5_Keterangan2.png" /></td><td>Keterangan : -</td></tr></table>', layer: layer_PersebaranTitikHanggarPengelolaanSampahKabupatenTegal_5},
+            {label: 'Persebaran Hanggar Pengelolaan Sampah Kabupaten Tegal<br /><table><tr><td style="text-align: center;"><img src="legend/PersebaranHanggarPengelolaanSampahKabupatenTegal_4_JumlahHanggarTidakAda0.png" /></td><td>Jumlah Hanggar : Tidak Ada</td></tr><tr><td style="text-align: center;"><img src="legend/PersebaranHanggarPengelolaanSampahKabupatenTegal_4_JumlahHanggar11.png" /></td><td>Jumlah Hanggar : 1</td></tr><tr><td style="text-align: center;"><img src="legend/PersebaranHanggarPengelolaanSampahKabupatenTegal_4_JumlahHanggar22.png" /></td><td>Jumlah Hanggar : 2</td></tr><tr><td style="text-align: center;"><img src="legend/PersebaranHanggarPengelolaanSampahKabupatenTegal_4_JumlahHanggar53.png" /></td><td>Jumlah Hanggar : 5</td></tr><tr><td style="text-align: center;"><img src="legend/PersebaranHanggarPengelolaanSampahKabupatenTegal_4_JumlahHanggar64.png" /></td><td>Jumlah Hanggar : 6</td></tr></table>', layer: layer_PersebaranHanggarPengelolaanSampahKabupatenTegal_4},
+            {label: 'Kepadatan Penduduk Kabupaten Tegal<br /><table><tr><td style="text-align: center;"><img src="legend/KepadatanPendudukKabupatenTegal_3_SangatTinggi0.png" /></td><td>Sangat Tinggi</td></tr><tr><td style="text-align: center;"><img src="legend/KepadatanPendudukKabupatenTegal_3_Tinggi1.png" /></td><td>Tinggi</td></tr><tr><td style="text-align: center;"><img src="legend/KepadatanPendudukKabupatenTegal_3_Sedang2.png" /></td><td>Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KepadatanPendudukKabupatenTegal_3_Rendah3.png" /></td><td>Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KepadatanPendudukKabupatenTegal_3_SangatRendah4.png" /></td><td>Sangat Rendah</td></tr></table>', layer: layer_KepadatanPendudukKabupatenTegal_3},
+            {label: '<img src="legend/PetaAdministrasiDesaKelurahan_2.png" /> Peta Administrasi Desa Kelurahan', layer: layer_PetaAdministrasiDesaKelurahan_2},
+            {label: '<img src="legend/BatasKecamatanKabupatenTegal_1.png" /> Batas Kecamatan Kabupaten Tegal', layer: layer_BatasKecamatanKabupatenTegal_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        resetLabels([layer_PetaAdministrasiDesaKelurahan_2]);
+        map.on("zoomend", function(){
+            resetLabels([layer_PetaAdministrasiDesaKelurahan_2]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_PetaAdministrasiDesaKelurahan_2]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_PetaAdministrasiDesaKelurahan_2]);
+        });
+        </script>
+    </body>
+</html>
